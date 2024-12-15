@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/jessevdk/go-flags"
 
@@ -49,12 +50,40 @@ func run(args []string, opts Options) error {
 
 	// no subcommand, run the TUI
 	if len(args) == 0 {
-		return cmds.TUI()
+		// Set the interval duration in minutes
+		interval := time.Duration(cfg.Refresh.Interval) * time.Second * 60
+		ticker := time.NewTicker(interval)
+		// Ensure ticker is stopped when the function exits
+		defer ticker.Stop()
+
+		// Channel to signal when to stop the ticker
+		done := make(chan bool)
+
+		go func() {
+			for {
+				select {
+				case <-ticker.C:
+					cmds.Refresh()
+				case <-done:
+					return // Exit the goroutine when done is signaled
+				}
+			}
+		}()
+
+		// run the TUI
+		err := cmds.TUI()
+
+		done <- true
+		return err
 	}
 
 	switch args[0] {
 	case "list":
 		return cmds.List(opts.Number)
+	case "refresh":
+		return cmds.Refresh()
+	case "config":
+		return cmds.ShowConfig()
 	case "add":
 		if len(args) != 2 {
 			return ErrNotEnoughArgs

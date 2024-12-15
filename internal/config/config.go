@@ -42,6 +42,10 @@ type Opener struct {
 	Takeover bool   `yaml:"takeover"`
 }
 
+type Refresh struct {
+	Interval int `yaml:"interval"`
+}
+
 type Theme struct {
 	Glamour           string `yaml:"glamour,omitempty"`
 	TitleColor        string `yaml:"titleColor,omitempty"`
@@ -64,6 +68,7 @@ type Config struct {
 	AutoRead     bool         `yaml:"autoread,omitempty"`
 	Openers      []Opener     `yaml:"openers,omitempty"`
 	Theme        Theme        `yaml:"theme,omitempty"`
+	Refresh      Refresh      `yaml:"refresh,omitempty"`
 	HTTPOptions  *HTTPOptions `yaml:"http,omitempty"`
 }
 
@@ -110,6 +115,9 @@ func New(configPath string, pager string, previewFeeds []string, version string)
 			TitleColor:        "62",
 			FilterColor:       "62",
 		},
+		Refresh: Refresh{
+			Interval: 5,
+		},
 		HTTPOptions: &HTTPOptions{
 			MinTLSVersion: tls.VersionName(tls.VersionTLS12),
 		},
@@ -142,6 +150,10 @@ func (c *Config) Load() error {
 	c.AutoRead = fileConfig.AutoRead
 	c.Feeds = fileConfig.Feeds
 	c.Openers = fileConfig.Openers
+
+	if fileConfig.Refresh.Interval != 0 {
+		c.Refresh.Interval = fileConfig.Refresh.Interval
+	}
 
 	if fileConfig.HTTPOptions != nil {
 		if _, err := TLSVersion(fileConfig.HTTPOptions.MinTLSVersion); err != nil {

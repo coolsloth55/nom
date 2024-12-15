@@ -20,6 +20,8 @@ $ curl -L https://github.com/guyfedwards/nom/releases/download/v2.1.4/nom_2.1.4_
 $ nom # start TUI
 $ nom list -n 20 # list feed items in $PAGER, optionally show more
 $ nom add <feed_url> 
+$ nom refresh # refresh feed(s) without opening TUI
+$ nom config # shows nom config
 $ nom --feed <feed_url> # preview feed without adding to config
 ```
 
